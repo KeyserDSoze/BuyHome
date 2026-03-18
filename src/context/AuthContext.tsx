@@ -9,6 +9,8 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useEffect,
+  useRef,
 } from 'react';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import { Project } from '../models/types';
@@ -175,6 +177,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLastSync(null);
     setSyncError(null);
   }, []);
+
+  // ── Silent token refresh ────────────────────────────────────────────────────
+  //
+  // Google OAuth implicit flow has no refresh token: the access token lasts 1h.
+  // We can ask for a new one silently (no popup) using prompt:'none' as long as
+  // the user still has an active Google session in the browser.
+  // We schedule a setTimeout to fire 10 min before the stored token expires;
+  // on success we extend seamlessly, on failure we do nothing (native expiry
+  // handling then shows the "Accedi" button when needed).
+
+  const openSilentRefresh = useGoogleLogin({
+    onSuccess: tokenResponse => {
+      const { access_token, expires_in, scope } = tokenResponse;
+      const expiry = Date.now() + (expires_in - 60) * 1000;
+      // Reuse the existing user profile — no need for another /userinfo call
+      persistAuth({
+        accessToken: access_token,
+        expiry,
+        grantedScopes: scope ?? storedAuth?.grantedScopes ?? '',
+        user: storedAuth!.user,
+        driveFolderId: storedAuth?.driveFolderId ?? null,
+        driveFileId: storedAuth?.driveFileId ?? null,
+      });
+    },
+    onError: err => {
+      // Non-fatal: the user will be prompted to re-login when the token expires
+      console.warn('Silent token refresh failed', err);
+    },
+    prompt: 'none',
+    scope: GOOGLE_OAUTH_SCOPES,
+  });
+
+  // Keep a ref so the setTimeout closure always sees the latest function
+  const silentRefreshRef = useRef(openSilentRefresh);
+  silentRefreshRef.current = openSilentRefresh;
+
+  useEffect(() => {
+    if (!storedAuth || Date.now() >= storedAuth.expiry) return;
+
+    // Fire 10 min before the token expires (minimum 0ms so it always fires)
+    const msUntilRefresh = Math.max(0, storedAuth.expiry - Date.now() - 10 * 60 * 1000);
+    const timer = setTimeout(() => {
+      silentRefreshRef.current();
+    }, msUntilRefresh);
+
+    return () => clearTimeout(timer);
+  // Re-schedule every time a new token is stored (expiry changes)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storedAuth?.expiry]);
 
   // ── Drive helpers ───────────────────────────────────────────────────────────
 
