@@ -26,6 +26,7 @@ const GOOGLE_OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
 ].join(' ');
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -38,9 +39,14 @@ export interface GoogleUser {
 interface StoredAuth {
   accessToken: string;
   expiry: number;
+  grantedScopes?: string;
   user: GoogleUser;
   driveFolderId: string | null;
   driveFileId: string | null;
+}
+
+function hasGrantedDriveScope(grantedScopes?: string): boolean {
+  return grantedScopes?.split(' ').includes(DRIVE_SCOPE) ?? false;
 }
 
 export interface AuthContextValue {
@@ -116,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const openGoogleLogin = useGoogleLogin({
     onSuccess: async tokenResponse => {
-      const { access_token, expires_in } = tokenResponse;
+      const { access_token, expires_in, scope } = tokenResponse;
       // 60-second buffer before actual expiry
       const expiry = Date.now() + (expires_in - 60) * 1000;
 
@@ -131,9 +137,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // non-fatal
       }
 
+      const grantedScopes = scope ?? '';
+      if (!hasGrantedDriveScope(grantedScopes)) {
+        setSyncError('Google non ha concesso l\'accesso a Drive. Controlla il consenso OAuth e riprova.');
+      }
+
       persistAuth({
         accessToken: access_token,
         expiry,
+        grantedScopes,
         user,
         driveFolderId: storedAuth?.driveFolderId ?? null,
         driveFileId: storedAuth?.driveFileId ?? null,
@@ -185,6 +197,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const syncToDrive = useCallback(async () => {
     if (!isTokenValid || !storedAuth) return;
+    if (storedAuth.grantedScopes && !hasGrantedDriveScope(storedAuth.grantedScopes)) {
+      setSyncError('Il token corrente non include i permessi Google Drive. Rientra con Google e conferma l\'accesso a Drive.');
+      return;
+    }
     setIsSyncing(true);
     setSyncError(null);
     try {
@@ -212,6 +228,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const syncFromDrive = useCallback(async (): Promise<Project[] | null> => {
     if (!isTokenValid || !storedAuth) return null;
+    if (storedAuth.grantedScopes && !hasGrantedDriveScope(storedAuth.grantedScopes)) {
+      setSyncError('Il token corrente non include i permessi Google Drive. Rientra con Google e conferma l\'accesso a Drive.');
+      return null;
+    }
     setIsSyncing(true);
     setSyncError(null);
     try {
