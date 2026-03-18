@@ -155,6 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Google login error', err);
       setSyncError('Accesso Google non riuscito.');
     },
+    prompt: 'consent',
     scope: GOOGLE_OAUTH_SCOPES,
   });
 
