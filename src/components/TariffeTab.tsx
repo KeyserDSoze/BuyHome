@@ -161,8 +161,8 @@ export default function TariffeTab() {
           Nessuna tariffa inserita. Aggiungi le tariffe per calcolare la rendita.
         </Paper>
       ) : (
-        <TableContainer component={Paper}>
-          <Table size="small">
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table size="small" sx={{ minWidth: 520 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: 'primary.main' }}>
                 <TableCell sx={{ color: 'white' }}>Categoria</TableCell>

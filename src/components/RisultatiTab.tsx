@@ -68,7 +68,8 @@ function AuditTrailPanel({ result }: { result: RenditaResult }) {
           <Typography variant="subtitle2" color="primary" gutterBottom>
             {floor.floorName} — {num(floor.floorVaniRaw)} vani grezzi
           </Typography>
-          <Table size="small">
+          <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table size="small" sx={{ minWidth: 460 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Vano</TableCell>
@@ -106,6 +107,7 @@ function AuditTrailPanel({ result }: { result: RenditaResult }) {
               ))}
             </TableBody>
           </Table>
+          </TableContainer>
         </Box>
       ))}
 

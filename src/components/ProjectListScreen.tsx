@@ -94,7 +94,7 @@ function AuthSection() {
           icon={<CloudDoneIcon />}
           label={`Sync ${lastSync.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`}
           size="small"
-          sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: 'white' }}
+          sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: 'white', display: { xs: 'none', sm: 'flex' } }}
         />
       )}
       <Tooltip title={user?.email ?? ''}>

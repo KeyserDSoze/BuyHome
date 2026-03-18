@@ -25,6 +25,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  TableContainer,
   Chip,
   Tooltip,
   Stack,
@@ -387,7 +388,8 @@ function FloorSection({ unitId, floor }: FloorSectionProps) {
 
         {/* Rooms table */}
         {floor.rooms.length > 0 && (
-          <Table size="small" sx={{ mb: 1 }}>
+          <TableContainer sx={{ overflowX: 'auto', mb: 1 }}>
+          <Table size="small" sx={{ minWidth: 380 }}>
             <TableHead>
               <TableRow>
                 <TableCell><strong>Vano</strong></TableCell>
@@ -432,6 +434,7 @@ function FloorSection({ unitId, floor }: FloorSectionProps) {
               ))}
             </TableBody>
           </Table>
+          </TableContainer>
         )}
 
         <Button

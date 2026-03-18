@@ -507,7 +507,7 @@ function ContractDialog({ open, initial, onClose, onSave }: ContractDialogProps)
             <Tab label="Utenze" />
           </Tabs>
         </Box>
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: { xs: 2, sm: 3 } }}>
 
         {/* ── Tab 0: Immobili ── */}
         {tab === 0 && (

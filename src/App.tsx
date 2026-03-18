@@ -108,7 +108,9 @@ function AppContent() {
             {project.jurisdiction.comune && ` — ${project.jurisdiction.comune}`}
           </Typography>
           <ThemeModeButton />
-          <SaveIndicator />
+          <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+            <SaveIndicator />
+          </Box>
         </Toolbar>
         <Tabs
           value={tab}
@@ -119,14 +121,28 @@ function AppContent() {
           scrollButtons="auto"
           sx={{ bgcolor: 'primary.dark', borderRadius: 0 }}
         >
-          <Tab icon={<HomeIcon />} label="Progetto" iconPosition="start" />
-          <Tab icon={<EuroIcon />} label="Tariffe" iconPosition="start" />
-          <Tab icon={<ApartmentIcon />} label="Unità" iconPosition="start" />
-          <Tab icon={<TuneIcon />} label="Regole" iconPosition="start" />
-          <Tab icon={<CompareIcon />} label="Scenari" iconPosition="start" />
-          <Tab icon={<AssessmentIcon />} label="Risultati" iconPosition="start" />
-          <Tab icon={<PeopleIcon />} label="Persone" iconPosition="start" />
-          <Tab icon={<ArticleIcon />} label="Contratto" iconPosition="start" />
+          {([
+            { icon: <HomeIcon />, label: 'Progetto' },
+            { icon: <EuroIcon />, label: 'Tariffe' },
+            { icon: <ApartmentIcon />, label: 'Unità' },
+            { icon: <TuneIcon />, label: 'Regole' },
+            { icon: <CompareIcon />, label: 'Scenari' },
+            { icon: <AssessmentIcon />, label: 'Risultati' },
+            { icon: <PeopleIcon />, label: 'Persone' },
+            { icon: <ArticleIcon />, label: 'Contratto' },
+          ] as const).map(({ icon, label }) => (
+            <Tab
+              key={label}
+              icon={icon}
+              label={<Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{label}</Box>}
+              iconPosition="start"
+              sx={{
+                minWidth: { xs: 44, sm: 90 },
+                px: { xs: 0.5, sm: 2 },
+                '& .MuiTab-iconWrapper': { mr: { xs: 0, sm: 1 } },
+              }}
+            />
+          ))}
         </Tabs>
       </AppBar>
 
