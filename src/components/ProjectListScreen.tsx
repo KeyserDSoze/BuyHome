@@ -18,7 +18,9 @@ import GoogleIcon from '@mui/icons-material/Google';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import ShareIcon from '@mui/icons-material/Share';
 import { v4 as uuidv4 } from 'uuid';
+import ShareDialog from './ShareDialog';
 import { useAuth } from '../context/AuthContext';
 import { useThemeMode } from '../context/ThemeModeContext';
 import {
@@ -137,9 +139,10 @@ interface ProjectCardProps {
   onOpen: () => void;
   onDelete: () => void;
   onExport: () => void;
+  onShare: () => void;
 }
 
-function ProjectCard({ project, onOpen, onDelete, onExport }: ProjectCardProps) {
+function ProjectCard({ project, onOpen, onDelete, onExport, onShare }: ProjectCardProps) {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   const scenarioCount = project.scenarios?.length ?? 0;
@@ -183,6 +186,10 @@ function ProjectCard({ project, onOpen, onDelete, onExport }: ProjectCardProps) 
           >
             <MenuItem onClick={() => { onExport(); setMenuAnchor(null); }}>
               Esporta JSON
+            </MenuItem>
+            <MenuItem onClick={() => { onShare(); setMenuAnchor(null); }}>
+              <ShareIcon fontSize="small" sx={{ mr: 1 }} />
+              Condividi link
             </MenuItem>
             <Divider />
             <MenuItem onClick={() => { onDelete(); setMenuAnchor(null); }} sx={{ color: 'error.main' }}>
@@ -296,6 +303,7 @@ export default function ProjectListScreen({ onOpen }: ProjectListScreenProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [newDialogOpen, setNewDialogOpen] = useState(false);
   const [snack, setSnack] = useState('');
+  const [shareProject, setShareProject] = useState<Project | null>(null);
 
   const reload = useCallback(() => {
     migrateLegacy();
@@ -454,6 +462,7 @@ export default function ProjectListScreen({ onOpen }: ProjectListScreenProps) {
                   onOpen={() => onOpen(p.id)}
                   onDelete={() => handleDelete(p.id, p.name)}
                   onExport={() => handleExport(p)}
+                  onShare={() => setShareProject(p)}
                 />
               </Grid>
             ))}
@@ -500,6 +509,15 @@ export default function ProjectListScreen({ onOpen }: ProjectListScreenProps) {
         onClose={() => setNewDialogOpen(false)}
         onCreate={handleCreate}
       />
+
+      {/* Share dialog */}
+      {shareProject && (
+        <ShareDialog
+          open
+          project={shareProject}
+          onClose={() => setShareProject(null)}
+        />
+      )}
 
       {/* Snackbar feedback */}
       <Snackbar

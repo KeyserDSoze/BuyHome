@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Tabs,
@@ -9,6 +9,8 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import EuroIcon from '@mui/icons-material/Euro';
@@ -34,6 +36,9 @@ import ScenariTab from './components/ScenariTab';
 import RisultatiTab from './components/RisultatiTab';
 import PersoneTab from './components/PersoneTab';
 import ContrattoTab from './components/ContrattoTab';
+import ImportFromUrlDialog from './components/ImportFromUrlDialog';
+import { decodeProject, extractShareParam } from './sharing/shareCodec';
+import { Project } from './models/types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -165,6 +170,21 @@ function AppContent() {
 function AppInner() {
   const { isTokenValid, syncToDrive } = useAuth();
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [pendingLinkImport, setPendingLinkImport] = useState<Project | null>(null);
+  const [urlImportError, setUrlImportError] = useState(false);
+
+  // Detect ?i= share param on first mount
+  useEffect(() => {
+    const param = extractShareParam();
+    if (!param) return;
+    // Clean URL immediately so refresh doesn't re-trigger
+    window.history.replaceState({}, '', window.location.pathname);
+    try {
+      setPendingLinkImport(decodeProject(param));
+    } catch {
+      setUrlImportError(true);
+    }
+  }, []);
 
   function handleOpen(id: string) {
     setActiveProjectId(id);
@@ -177,7 +197,22 @@ function AppInner() {
   }
 
   if (activeProjectId === null) {
-    return <ProjectListScreen onOpen={handleOpen} />;
+    return (
+      <>
+        <ProjectListScreen onOpen={handleOpen} />
+        {pendingLinkImport && (
+          <ImportFromUrlDialog
+            open
+            project={pendingLinkImport}
+            onClose={() => setPendingLinkImport(null)}
+            onImported={id => { setPendingLinkImport(null); handleOpen(id); }}
+          />
+        )}
+        <Snackbar open={urlImportError} autoHideDuration={5000} onClose={() => setUrlImportError(false)}>
+          <Alert severity="error" onClose={() => setUrlImportError(false)}>Link di condivisione non valido o corrotto.</Alert>
+        </Snackbar>
+      </>
+    );
   }
 
   return (
