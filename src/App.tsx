@@ -20,8 +20,11 @@ import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import PeopleIcon from '@mui/icons-material/People';
 import ArticleIcon from '@mui/icons-material/Article';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import { ProjectProvider, useProject } from './context/ProjectContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useThemeMode } from './context/ThemeModeContext';
 import ProjectListScreen from './components/ProjectListScreen';
 import ProgettoTab from './components/ProgettoTab';
 import TariffeTab from './components/TariffeTab';
@@ -63,6 +66,18 @@ function SaveIndicator() {
   );
 }
 
+function ThemeModeButton() {
+  const { mode, toggleMode } = useThemeMode();
+
+  return (
+    <Tooltip title={mode === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'}>
+      <IconButton color="inherit" onClick={toggleMode} sx={{ mr: 1 }}>
+        {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
 function AppContent() {
   const [tab, setTab] = useState(0);
   const { project, closeProject } = useProject();
@@ -92,6 +107,7 @@ function AppContent() {
             {project.name}
             {project.jurisdiction.comune && ` — ${project.jurisdiction.comune}`}
           </Typography>
+          <ThemeModeButton />
           <SaveIndicator />
         </Toolbar>
         <Tabs
@@ -101,7 +117,7 @@ function AppContent() {
           indicatorColor="secondary"
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ bgcolor: 'primary.dark' }}
+          sx={{ bgcolor: 'primary.dark', borderRadius: 0 }}
         >
           <Tab icon={<HomeIcon />} label="Progetto" iconPosition="start" />
           <Tab icon={<EuroIcon />} label="Tariffe" iconPosition="start" />

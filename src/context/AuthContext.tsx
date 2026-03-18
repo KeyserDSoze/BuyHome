@@ -21,6 +21,12 @@ import {
 } from '../storage/driveSync';
 import { mergeProjects, getAllProjects } from '../storage/projectsStore';
 
+const GOOGLE_OAUTH_SCOPES = [
+  'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+].join(' ');
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface GoogleUser {
@@ -137,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Google login error', err);
       setSyncError('Accesso Google non riuscito.');
     },
-    scope: 'https://www.googleapis.com/auth/drive.file',
+    scope: GOOGLE_OAUTH_SCOPES,
   });
 
   const signIn = useCallback(() => {

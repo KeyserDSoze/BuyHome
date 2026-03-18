@@ -16,8 +16,11 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import GoogleIcon from '@mui/icons-material/Google';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../context/AuthContext';
+import { useThemeMode } from '../context/ThemeModeContext';
 import {
   getAllProjects,
   saveProject,
@@ -36,6 +39,18 @@ function formatDate(iso: string) {
   } catch {
     return iso;
   }
+}
+
+function ThemeModeButton() {
+  const { mode, toggleMode } = useThemeMode();
+
+  return (
+    <Tooltip title={mode === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'}>
+      <IconButton color="inherit" onClick={toggleMode}>
+        {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+      </IconButton>
+    </Tooltip>
+  );
 }
 
 // ── Auth button / user chip ───────────────────────────────────────────────────
@@ -361,6 +376,7 @@ export default function ProjectListScreen({ onOpen }: ProjectListScreenProps) {
           <Typography variant="h6" fontWeight={700} sx={{ flex: 1 }}>
             🏠 BuyHome
           </Typography>
+          <ThemeModeButton />
           {isSyncing && <CircularProgress size={20} sx={{ color: 'white' }} />}
           <AuthSection />
         </Toolbar>
